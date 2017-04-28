@@ -1,10 +1,12 @@
 #!/bin/bash
+#A5F
 #Cleanup before build
 	rm -rf $(pwd)/output
 	rm -rf $(pwd)/hK-out
 	make clean
 
 #The build 
+	sed -i 's/model/A500F/g' $(pwd)/.scmversion
 	export ARCH=arm
 	export CROSS_COMPILE=$(pwd)/hK-tools/arm-eabi-4.8/bin/arm-eabi-
 	mkdir -p output hK-out/pack/rd hK-out/zip/hades hK-zip
@@ -12,6 +14,7 @@
 	make -C $(pwd) O=output msm8916_sec_defconfig VARIANT_DEFCONFIG=t550_defconfig SELINUX_DEFCONFIG=selinux_defconfig
 	make -j64 -C $(pwd) O=output
 
+	sed -i 's/A500F/model/g' $(pwd)/.scmversion
 # zImage copying - assuming the zimage is built
 	cp output/arch/arm/boot/zImage $(pwd)/hK-out/pack/zImage
 
@@ -23,7 +26,9 @@
 	cp -r hK-tools/ramdisk/common/* hK-out/pack/rd
 	cp -r hK-tools/ramdisk/T550/* hK-out/pack/rd
 	cd $(pwd)/hK-out/pack/rd
-	mkdir -p data dev oem proc sys system
+	mkdir -p hmod data dev oem proc sys system
+	cp -r ../../../output/drivers/staging/prima/wlan.ko hmod/wlan.ko
+	cp -r ../../../output/drivers/media/radio/radio-iris-transport.ko hmod/radio.ko
 	echo "Setting ramdisk file permissions..."
 	# set all directories to 0755 by default
 	find -type d -exec chmod 755 {} \;
@@ -53,18 +58,13 @@ echo ""
 
 echo -n "SEANDROIDENFORCE" >> $(pwd)/hK-out/zip/boot.img
 
-#Auto made zips for F only - now
+#Zip packing
 cp -r $(pwd)/hK-tools/META-INF $(pwd)/hK-out/zip/
 sed -i 's/A500xx/A500F/g' $(pwd)/hK-out/zip/META-INF/com/google/android/aroma-config
-cp -r $(pwd)/output/drivers/staging/prima/wlan.ko $(pwd)/hK-out/zip/hades/hades
-cp -r $(pwd)/output/drivers/media/radio/radio-iris-transport.ko $(pwd)/hK-out/zip/hades/radio
 cp -r $(pwd)/hK-tools/scripts/* $(pwd)/hK-out/zip/hades/
-cp -r $(pwd)/hK-tools/*SuperSU*.zip $(pwd)/hK-out/zip/hades/SuperSU.zip
+cp -r $(pwd)/hK-tools/*Magisk*.zip $(pwd)/hK-out/zip/hades/magisk.zip
+cp -r $(pwd)/hK-tools/*SuperSU*.zip $(pwd)/hK-out/zip/hades/supersu.zip
 cd hK-out/zip
-zip -r -9 - * > ../../hK-zip/"A500F$(cat ../../.scmversion).zip"
+zip -r -9 - * > ../../hK-zip/A500F-hadesKernel-v2.4.zip
 cd ../../
-
-echo "Done!"
-
-
 
