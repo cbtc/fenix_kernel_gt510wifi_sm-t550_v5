@@ -1,4 +1,5 @@
 <b><#selectbg_g>v5.1</#></b>
+<*>reañadidos hotplugs</*>
 <*>reverted the new method of modules implementation since it`s not working on all devices</*>
 <*>añadido de nuevo i/o schedulers</*>
 
